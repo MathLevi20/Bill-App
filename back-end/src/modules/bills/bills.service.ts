@@ -49,9 +49,47 @@ export class BillsService {
     return this.billRepository.save(bill);
   }
 
-  async findAll(): Promise<Bill[]> {
-    return this.billRepository.find({
+  async findAll(): Promise<any[]> {
+    const bills = await this.billRepository.find({
       relations: ['client'],
+    });
+    
+    // Try to find matching PDF files for each bill
+    const installationsWithFiles = await this.listPdfFiles();
+    
+    return bills.map(bill => {
+      let filename = null;
+      
+      // Try to find matching file for this bill
+      if (bill.client && bill.client.clientNumber) {
+        const installation = installationsWithFiles.find(
+          install => install.installation === bill.client.clientNumber
+        );
+        
+        if (installation) {
+          // Look for file matching month and year
+          const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                             'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+          const monthIndex = monthNames.findIndex(
+            m => m.toLowerCase() === bill.referenceMonth.toLowerCase()
+          );
+          
+          if (monthIndex !== -1) {
+            const monthNum = (monthIndex + 1).toString().padStart(2, '0');
+            const filePattern = new RegExp(`${bill.client.clientNumber}-${monthNum}-${bill.referenceYear}\\.pdf$`, 'i');
+            
+            const matchingFile = installation.files.find(file => filePattern.test(file));
+            if (matchingFile) {
+              filename = matchingFile;
+            }
+          }
+        }
+      }
+      
+      return {
+        ...bill,
+        filename
+      };
     });
   }
 

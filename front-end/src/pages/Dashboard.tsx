@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Bill, FilterParams, SummaryCard as SummaryCardType } from '../types';
+import { Bill, FilterParams, SummaryCard as SummaryCardType } from '../types/index';
 import { getBills, getSummaryData } from '../services/api';
 import FilterPanel from '../components/FilterPanel';
 import SummaryCard from '../components/SummaryCard';

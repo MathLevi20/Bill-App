@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Client, CreateBillDto } from '../types';
+import { Client, CreateBillDto } from '../types/index';
 import { getClients, createBill } from '../services/api';
 
 interface ManualBillFormProps {
@@ -37,7 +37,7 @@ const ManualBillForm: React.FC<ManualBillFormProps> = ({ onSuccess }) => {
       const clientsData = await getClients();
       setClients(clientsData);
       if (clientsData.length > 0 && clientsData[0].id) {
-        setFormData(prev => ({ ...prev, clientId: Number(clientsData[0].id) }));
+        setFormData((prev: CreateBillDto) => ({ ...prev, clientId: Number(clientsData[0].id) }));
       }
     } catch (error) {
       console.error('Error fetching clients:', error);
@@ -62,9 +62,9 @@ const ManualBillForm: React.FC<ManualBillFormProps> = ({ onSuccess }) => {
       'energyCompensatedValue',
       'publicLightingValue'
     ].includes(name)) {
-      setFormData(prev => ({ ...prev, [name]: Number(value) }));
+      setFormData((prev: CreateBillDto) => ({ ...prev, [name]: Number(value) }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev: CreateBillDto) => ({ ...prev, [name]: value }));
     }
   };
 

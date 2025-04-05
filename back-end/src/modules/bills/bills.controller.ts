@@ -111,8 +111,29 @@ export class BillsController {
 
   @Get()
   @ApiOperation({ summary: 'Listar todas as faturas' })
-  @ApiResponse({ status: 200, description: 'Lista de faturas retornada com sucesso', type: [Bill] })
-  async findAll(): Promise<Bill[]> {
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de faturas retornada com sucesso', 
+    schema: {
+      type: 'array',
+      items: {
+        allOf: [
+          { $ref: '#/components/schemas/Bill' },
+          { 
+            type: 'object',
+            properties: {
+              filename: {
+                type: 'string',
+                nullable: true,
+                description: 'Nome do arquivo PDF da fatura, quando disponível'
+              }
+            }
+          }
+        ]
+      }
+    }
+  })
+  async findAll(): Promise<any[]> {
     return this.billsService.findAll();
   }
 

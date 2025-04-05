@@ -18,7 +18,7 @@ const Navigation: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-17">
         {/* Logo and Title */}
         <motion.div 
           className="flex items-center space-x-4"
@@ -26,8 +26,7 @@ const Navigation: React.FC = () => {
           animate={{ x: 0 }}
           transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
         >
-          <img src={logo} alt="Lumi Logo" className="h-12 w-12" />
-          <div className="text-lg font-bold">Bill Analyzer</div>
+          <img src={logo} alt="Lumi Logo" className="h-16 w-16" />
         </motion.div>
 
         {/* Mobile Menu Button */}
@@ -45,7 +44,7 @@ const Navigation: React.FC = () => {
         </div>
 
         {/* Desktop Navigation */}
-        <ul className="hidden md:flex space-x-6">
+        <ul className="hidden md:flex space-x-6 transition-colors duration-200">
           <NavItem to="/" icon={<FaHome />} label="Dashboard" />
           <NavItem to="/bills" icon={<FaBook />} label="Bills Library" />
           <NavItem to="/admin" icon={<FaUserShield />} label="Admin" />
@@ -61,7 +60,7 @@ const Navigation: React.FC = () => {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden"
           >
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-primary-light">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-primary-light ">
               <MobileNavItem to="/" icon={<FaHome />} label="Dashboard" onClick={toggleMenu} />
               <MobileNavItem to="/bills" icon={<FaBook />} label="Bills Library" onClick={toggleMenu} />
               <MobileNavItem to="/admin" icon={<FaUserShield />} label="Admin" onClick={toggleMenu} />

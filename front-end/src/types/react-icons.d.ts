@@ -31,6 +31,14 @@ declare module 'react-icons/fa' {
   export const FaTrashAlt: IconType;
   export const FaExclamationTriangle: IconType;
   
+  // Chart and data visualization icons
+  export const FaBolt: IconType;
+  export const FaMoneyBillWave: IconType;
+  export const FaSolarPanel: IconType;
+  export const FaLeaf: IconType;
+  export const FaChartLine: IconType;
+  export const FaFileInvoiceDollar: IconType;
+  
   // Other commonly used icons
   export const FaCheck: IconType;
   export const FaTrash: IconType;
@@ -42,6 +50,8 @@ declare module 'react-icons/fa' {
   export const FaArrowRight: IconType;
   export const FaExclamationCircle: IconType;
   export const FaCheckCircle: IconType;
+  export const FaFilter: IconType;
+  export const FaCalendarAlt: IconType;
 }
 
 declare module 'react-icons/md' {

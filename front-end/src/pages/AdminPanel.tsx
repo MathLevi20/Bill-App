@@ -9,7 +9,7 @@ import {
   resetAllBills
 } from '../services/api';
 import PdfViewerModal from '../components/PdfViewerModal';
-import { Client } from '../types';
+import { Client } from '../types/index';
 import { FaCloudUploadAlt, FaFileAlt, FaCog, FaFolder, FaEye, FaTrashAlt, FaExclamationTriangle } from 'react-icons/fa';
 
 const AdminPanel: React.FC = () => {
@@ -151,9 +151,9 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  const handleViewPdf = (installation: string, fileName: string) => {
+  const handleViewPdf = ( fileName: string) => {
     // Use just the filename for the new endpoint
-    const pdfUrl = getPdfViewUrl(installation, fileName);
+    const pdfUrl = getPdfViewUrl( fileName);
     setViewingPdf({ url: pdfUrl, fileName });
   };
 
@@ -365,7 +365,7 @@ const AdminPanel: React.FC = () => {
                           <span className="truncate">{file}</span>
                         </div>
                         <button 
-                          onClick={() => handleViewPdf(installationData.installation, file)}
+                          onClick={() => handleViewPdf( file)}
                           className="ml-2 text-primary hover:text-primary-dark flex items-center"
                           title="View PDF"
                         >

@@ -10,7 +10,8 @@ import {
   Legend,
 } from 'chart.js';
 import styled from 'styled-components';
-import { Bill } from '../types';
+import { Bill } from '../types/index';
+import { FaBolt } from 'react-icons/fa';
 
 ChartJS.register(
   CategoryScale,
@@ -103,7 +104,9 @@ const EnergyChart: React.FC<EnergyChartProps> = ({ bills, title }) => {
 
   return (
     <ChartContainer>
-      <ChartTitle>{title}</ChartTitle>
+      <ChartTitle>
+        <FaBolt className="inline-block mr-2 text-primary" /> {title}
+      </ChartTitle>
       {bills.length === 0 ? (
         <EmptyState>No data available</EmptyState>
       ) : (

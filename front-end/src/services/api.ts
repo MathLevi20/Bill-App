@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Bill, Client, FilterParams, CreateBillDto, CreateClientDto } from '../types';
+import { Bill, Client, FilterParams, CreateBillDto, CreateClientDto } from '../types/index';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
 
@@ -167,9 +167,9 @@ export const downloadBillPdf = async (billId: string): Promise<Blob> => {
   }
 };
 
-export const getPdfViewUrl = (installation: string, fileName: string): string => {
-  // Format the installation string with proper prefix and URL encoding
-  const formattedInstallation = encodeURIComponent(`Instalação_ ${installation}`);
+export const getPdfViewUrl = (fileName: string): string => {
+  // Prefix variable name with underscore to indicate intentionally unused
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   
   // Return the URL to the PDF file for viewing in browser
   return `${API_URL}bills/pdf/${fileName}`;

@@ -27,6 +27,7 @@ export interface Bill {
   createdAt: string;
   updatedAt: string;
   client: Client;
+  filename: string;
 }
 
 export interface CreateBillDto {
@@ -46,6 +47,8 @@ export interface FilterParams {
   clientNumber?: string;
   startDate?: string;
   endDate?: string;
+  year?: string; // Add this line
+
 }
 
 export interface ChartData {
