@@ -1,0 +1,45 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:14
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: energy_bills
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - energy-bills-network
+
+  # Serviço API (comentado por enquanto)
+  # api:
+  #   container_name: energy-bills-api
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.debian
+  #   ports:
+  #     - "4000:4000"
+  #   environment:
+  #     - NODE_ENV=docker
+  #     - DATABASE_URL=postgresql://admin:admin@postgres:5432/energy_bills?schema=public
+  #     - FATURAS_FOLDER_PATH=/app/faturas
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules
+  #     - ./faturas:/app/faturas
+  #   depends_on:
+  #     - postgres
+  #   restart: unless-stopped
+  #   networks:
+  #     - energy-bills-network
+
+networks:
+  energy-bills-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: lumi-energy-bills-postgres-data

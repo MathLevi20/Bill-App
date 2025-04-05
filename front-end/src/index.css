@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-light-gray text-primary-dark font-sans;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-bold text-primary-dark;
+}
+
+a {
+  @apply text-primary hover:underline;
+}
+
+button {
+  @apply bg-primary text-white rounded px-4 py-2 hover:bg-primary-dark;
+}

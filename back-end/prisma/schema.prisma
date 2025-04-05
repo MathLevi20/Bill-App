@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id            Int    @id @default(autoincrement())
+  name          String
+  clientNumber  String @unique
+  bills         Bill[]
+}
+
+model Bill {
+  id                  Int      @id @default(autoincrement())
+  referenceMonth      String
+  referenceYear       Int
+  energyElectricKwh   Float
+  energyElectricValue Float
+  energySCEEEKwh      Float
+  energySCEEEValue    Float
+  energyCompensatedKwh Float
+  energyCompensatedValue Float
+  publicLightingValue Float
+  totalEnergyConsumption Float
+  totalValueWithoutGD Float
+  gdSavings           Float
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  clientId            Int
+  client              Client   @relation(fields: [clientId], references: [id])
+}
