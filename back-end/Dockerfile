@@ -11,7 +11,7 @@ RUN apk add --no-cache openssl libc6-compat
 COPY package*.json yarn.lock ./
 
 # Install dependencies using yarn
-RUN yarn install --frozen-lockfile
+RUN yarn install 
 
 # Copy Prisma schema and generate Prisma Client
 COPY prisma ./prisma/

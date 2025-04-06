@@ -5,6 +5,7 @@ services:
     build:
       context: ./back-end
       dockerfile: Dockerfile
+    container_name: lumi_energy-bills-backend
     ports:
       - "4000:4000"
     environment:
@@ -20,6 +21,7 @@ services:
     build:
       context: ./front-end
       dockerfile: Dockerfile
+    container_name: lumi_energy-bills-frontend
     ports:
       - "3000:3000"
     environment:
@@ -30,16 +32,22 @@ services:
     command: npm start
 
   db:
-    image: postgres:15
-    container_name: postgres
+    image: postgres:14
+    container_name: lumi_energy-bills-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: energy_bills
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: bill_app
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   postgres_data:

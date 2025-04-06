@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:14
-    container_name: postgres
+    container_name: lumi_energy-bills-postgres
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -19,12 +19,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: energy-bills-api
+    container_name: lumi_energy-bills-api
     ports:
       - "4000:4000"
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://admin:admin@postgres:5432/energy_bills
+      DATABASE_URL: postgresql://admin:admin@lumi_energy-bills-postgres:5432/energy_bills
       FATURAS_FOLDER_PATH: /app/faturas
     volumes:
       - .:/app
@@ -41,4 +41,4 @@ networks:
 
 volumes:
   postgres_data:
-    name: energy-bills-postgres-data
+    name: lumi_energy-bills-postgres-data
