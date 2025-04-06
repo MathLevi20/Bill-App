@@ -2,6 +2,6 @@ node_modules
 dist
 .git
 .gitignore
+
 npm-debug.log
-faturas/*.pdf
 coverage
