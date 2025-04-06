@@ -27,11 +27,6 @@ lerna-debug.log*
 .docusaurus
 
 # Faturas
-Faturas/*.pdf
-Faturas/Instalação_*/**.pdf
-Faturas/**/*.pdf
-Faturas/**/Instalação_*/**/*.pdf
-Faturas/**/subpasta/**/*.pdf
 
 # Testes
 coverage/

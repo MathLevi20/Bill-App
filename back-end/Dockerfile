@@ -1,33 +1,30 @@
+# Use Node.js base image
 FROM node:18-alpine
 
+# Set working directory
 WORKDIR /app
 
-# Instalar dependências do sistema necessárias para o Prisma
+# Install system dependencies required for Prisma
 RUN apk add --no-cache openssl libc6-compat
 
-# Copiar os arquivos de configuração
-COPY package*.json ./
-COPY tsconfig.json ./
+# Copy package files
+COPY package*.json yarn.lock ./
+
+# Install dependencies using yarn
+RUN yarn install --frozen-lockfile
+
+# Copy Prisma schema and generate Prisma Client
 COPY prisma ./prisma/
-
-# Instalar dependências com --legacy-peer-deps para evitar problemas de compatibilidade
-RUN npm install --legacy-peer-deps
-
-# Gerar o Prisma Client com as flags corretas para Alpine
-ENV PRISMA_CLI_BINARY_TARGETS=linux-musl
 RUN npx prisma generate
 
-# Copiar o código fonte
+# Copy application source code
 COPY . .
 
-# Criar a pasta de faturas
-RUN mkdir -p /app/faturas
+# Build the application
+RUN yarn build
 
-# Compilar o TypeScript
-RUN npm run build
-
-# Expor a porta
+# Expose the application port
 EXPOSE 4000
 
-# Iniciar a aplicação
-CMD ["npm", "run", "start:prod"]
+# Start the application
+CMD ["yarn", "start:prod"]

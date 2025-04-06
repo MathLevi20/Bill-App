@@ -217,3 +217,9 @@ docker-compose build
 ```bash
 docker-compose up -d
 ```
+
+## Scripts Prisma
+
+- `prisma:generate`: Gera o cliente Prisma.
+- `prisma:studio`: Abre a interface gráfica do Prisma Studio.
+- `prisma:migrate`: Cria e aplica uma nova migração com o nome especificado (exemplo: `--name init`).

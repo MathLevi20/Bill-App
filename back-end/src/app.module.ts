@@ -18,21 +18,14 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        // Determine se estamos em um ambiente Docker ou local
-        const isDocker = process.env.NODE_ENV === 'docker';
-        
-        return {
-          type: 'postgres',
-          host: isDocker ? 'postgres' : 'localhost', // Use 'postgres' como hostname quando em Docker
-          port: 5432,
-          username: 'admin',
-          password: 'admin',
-          database: 'energy_bills',
-          entities: [Client, Bill],
-          synchronize: true,
-        };
-      },
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        url: configService.get<string>('NODE_ENV') === 'production'
+          ? configService.get<string>('DATABASE_URL')
+          : configService.get<string>('DATABASE_URL_LOCAL'),
+        entities: [__dirname + '/modules/**/*.entity{.ts,.js}'],
+        synchronize: true,
+      }),
     }),
     PrismaModule,
     ClientsModule,
