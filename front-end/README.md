@@ -3,6 +3,8 @@
 <div align="center">
   <img src="src/assets/logo.png" alt="Lumi Logo" width="200"/>
   <p>Uma aplicação web para análise de contas de energia e visualização de dados de consumo.</p>
+  
+  [📱 Demo ao vivo](https://lumi-energy-bills.vercel.app/)
 </div>
 
 ## 📋 Sumário
@@ -36,7 +38,7 @@
 ## 🔧 Instalação
 
 1. Clone o repositório:
-```bash
+```bashb
 git clone https://github.com/MathLevi20/Bill-App
 cd bill-app/front-end
 ```
@@ -95,5 +97,6 @@ src/
 5. Abra um Pull Request
 
 ---
+```
 
 

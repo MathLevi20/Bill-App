@@ -1,33 +1,30 @@
-# Use Node.js base image
-FROM node:18-alpine
+# Usar Debian (mais compatível com o Prisma) em vez de Alpine
+FROM node:18-slim
 
-# Set working directory
+# Configurar diretório de trabalho
 WORKDIR /app
 
-# Install system dependencies required for Prisma
-RUN apk add --no-cache openssl libc6-compat
+# Instalar dependências necessárias
+RUN apt-get update && apt-get install -y openssl
 
-# Set environment variable to force IPv4
-ENV NODE_OPTIONS="--dns-result-order=ipv4first"
+# Copiar arquivos de configuração
+COPY package.json ./
+COPY prisma ./prisma/
 
-# Copy package files
-COPY package*.json yarn.lock ./
-
-# Install dependencies using yarn
+# Instalar dependências
 RUN yarn install
 
-# Copy Prisma schema and generate Prisma Client
-COPY prisma ./prisma/
+# Gerar Prisma Client explicitamente
 RUN npx prisma generate
 
-# Copy application source code
+# Copiar todo o código fonte
 COPY . .
 
-# Build the application
+# Construir a aplicação
 RUN yarn build
 
-# Expose the application port
+# Expor porta
 EXPOSE 4000
 
-# Start the application
+# Iniciar a aplicação
 CMD ["yarn", "start:prod"]
