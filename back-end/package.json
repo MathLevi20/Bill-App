@@ -23,7 +23,7 @@
     "prisma:migrate": "prisma migrate dev --name init",
     "swagger-json": "node dist/swagger-static.js",
     "db:reset": "prisma migrate reset --force",
-    "db:migrate": "prisma migrate dev",
+    "db:migrate": ":prisma migrate dev",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "reset-db": "ts-node src/scripts/reset-database.ts",
