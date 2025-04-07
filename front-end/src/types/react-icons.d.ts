@@ -52,6 +52,9 @@ declare module 'react-icons/fa' {
   export const FaCheckCircle: IconType;
   export const FaFilter: IconType;
   export const FaCalendarAlt: IconType;
+  export const FaGlobe: IconType;
+  export const FaMoon: IconType; // Added
+  export const FaSun: IconType;  // Added
 }
 
 declare module 'react-icons/md' {

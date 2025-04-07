@@ -11,8 +11,10 @@ import {
 import PdfViewerModal from '../components/PdfViewerModal';
 import { Client } from '../types/index';
 import { FaCloudUploadAlt, FaFileAlt, FaCog, FaFolder, FaEye, FaTrashAlt, FaExclamationTriangle } from 'react-icons/fa';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const AdminPanel: React.FC = () => {
+  const { translate } = useLanguage();
   const [pdfFiles, setPdfFiles] = useState<{ installation: string, files: string[] }[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -114,11 +116,11 @@ const AdminPanel: React.FC = () => {
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0) {
-      setStatusMessage({ text: 'Please select at least one file to upload.', isError: true });
+      setStatusMessage({ text: translate('min_files_error'), isError: true });
       return;
     }
     if (!selectedClient) {
-      setStatusMessage({ text: 'Please select a client.', isError: true });
+      setStatusMessage({ text: translate('select_client_error'), isError: true });
       return;
     }
     try {
@@ -127,7 +129,10 @@ const AdminPanel: React.FC = () => {
       for (const file of selectedFiles) {
         await uploadBillPdf(file);
       }
-      setStatusMessage({ text: `${selectedFiles.length} file(s) uploaded successfully.`, isError: false });
+      setStatusMessage({ 
+        text: `${selectedFiles.length} ${translate('upload_success')}`, 
+        isError: false 
+      });
       setSelectedFiles([]);
       fetchPdfFiles();
     } catch (error) {
@@ -174,52 +179,121 @@ const AdminPanel: React.FC = () => {
     }
   };
 
+  // Add custom styles
+  const sectionStyles = `
+    bg-white dark:bg-gray-800 
+    rounded-lg shadow-md 
+    p-6 
+    border-t-4 border-primary
+    transition-all duration-200
+    hover:shadow-lg
+  `;
+
+  const titleStyles = `
+    text-xl font-semibold 
+    text-primary-dark dark:text-gray-200 
+    flex items-center
+    mb-2
+  `;
+
+  const descriptionStyles = `
+    text-sm text-gray-600 dark:text-gray-400 
+    mb-6
+  `;
+
+  const buttonBaseStyles = `
+    px-4 py-2 
+    rounded-md 
+    font-medium 
+    transition-all duration-200 
+    flex items-center 
+    justify-center
+    disabled:opacity-50 
+    disabled:cursor-not-allowed
+  `;
+
+  const primaryButtonStyles = `
+    ${buttonBaseStyles}
+    bg-primary hover:bg-primary-dark 
+    text-white
+    shadow-sm hover:shadow-md
+  `;
+
+  const dangerButtonStyles = `
+    ${buttonBaseStyles}
+    bg-error-red hover:bg-red-600 
+    text-white
+    shadow-sm hover:shadow-md
+  `;
+
   return (
     <div className="space-y-6">
       <motion.h1 
-        className="text-2xl font-bold text-primary-dark"
+        className="text-2xl font-bold text-primary-dark dark:text-gray-200"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
       >
-        Admin Panel
+        {translate('admin_panel')}
       </motion.h1>
 
-      {/* Upload Bill PDF Section */}
-      <motion.div 
-        className="bg-white rounded-lg shadow-md p-4 md:p-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <div className="flex items-center mb-4">
-          <FaCloudUploadAlt className="text-primary mr-2 text-xl" />
-          <h2 className="text-xl font-semibold text-primary-dark">Upload Bill PDF</h2>
-        </div>
-        
-        <div className="mb-4">
-          <label htmlFor="client-select" className="block text-sm font-medium text-primary-dark mb-1">
-            Select Client
+      {/* Upload Section */}
+      <motion.section className={sectionStyles}>
+        <h2 className={titleStyles}>
+          <FaCloudUploadAlt className="mr-2" />
+          {translate('upload_section')}
+        </h2>
+        <p className={descriptionStyles}>{translate('upload_section_desc')}</p>
+
+        {/* Client Selection with improved styles */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {translate('select_client')}
           </label>
-          <select
-            id="client-select"
-            value={selectedClient}
-            onChange={handleClientChange}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-          >
-            <option value="">-- Select a client --</option>
-            {clients.map(client => (
-              <option key={client.id} value={client.id}>
-                {client.name} (#{client.clientNumber})
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={selectedClient}
+              onChange={handleClientChange}
+              className="
+                w-full
+                appearance-none
+                bg-white dark:bg-gray-700
+                border border-gray-300 dark:border-gray-600
+                rounded-lg
+                py-2 px-4
+                pr-10
+                text-gray-700 dark:text-gray-200
+                leading-tight
+                focus:outline-none focus:ring-2 focus:ring-primary
+                cursor-pointer
+              "
+            >
+              <option value="">{translate('select_client_placeholder')}</option>
+              {clients.map(client => (
+                <option key={client.id} value={client.id}>
+                  {client.name} (#{client.clientNumber})
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
+              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+              </svg>
+            </div>
+          </div>
         </div>
 
+        {/* Drag and drop zone with improved styles */}
         <div
-          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-            isDragActive ? 'border-primary bg-green-50' : 'border-gray-300 hover:border-primary-light'
-          }`}
+          className={`
+            border-2 border-dashed 
+            rounded-lg p-8
+            text-center cursor-pointer
+            transition-all duration-200
+            ${isDragActive 
+              ? 'border-primary bg-primary bg-opacity-5' 
+              : 'border-gray-300 dark:border-gray-600 hover:border-primary-light'
+            }
+          `}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
           onDragOver={handleDragOver}
@@ -230,7 +304,7 @@ const AdminPanel: React.FC = () => {
             <FaFileAlt className="inline-block" />
           </div>
           <p className="text-gray-600">
-            {isDragActive ? 'Drop PDF files here...' : 'Drag and drop PDF files here, or click to select files'}
+            {isDragActive ? translate('drop_files_here') : translate('drag_drop_files')}
           </p>
         </div>
 
@@ -244,21 +318,28 @@ const AdminPanel: React.FC = () => {
           className="hidden"
         />
 
+        {/* Selected files list with improved styles */}
         {selectedFiles.length > 0 && (
-          <div className="mt-4">
-            <h3 className="text-sm font-medium text-primary-dark mb-2">
-              Selected Files ({selectedFiles.length})
+          <div className="mt-6 ">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              {selectedFiles.length} {translate('selected_files_count')}
             </h3>
-            <ul className="border border-gray-200 rounded-lg divide-y divide-gray-200 max-h-48 overflow-y-auto">
+            <ul className="
+              border border-gray-200 dark:border-gray-700 
+              rounded-lg 
+              divide-y divide-gray-200 dark:divide-gray-700
+              max-h-48 overflow-y-auto
+              bg-white dark:bg-gray-800 
+            ">
               {selectedFiles.map((file, index) => (
-                <li key={index} className="flex justify-between items-center p-2 hover:bg-gray-50">
-                  <span className="text-sm text-gray-700 truncate flex-1">{file.name}</span>
+                <li key={index} className="flex justify-between items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <span className="text-sm text-gray-700 dark:text-gray-200 truncate flex-1">{file.name}</span>
                   <button
                     type="button"
                     onClick={() => handleRemoveFile(index)}
                     className="ml-2 text-error-red hover:text-red-700 text-sm"
                   >
-                    Remove
+                    {translate('remove')}
                   </button>
                 </li>
               ))}
@@ -266,111 +347,93 @@ const AdminPanel: React.FC = () => {
           </div>
         )}
 
-        <div className="mt-4">
-          <motion.button
-            onClick={handleUpload}
-            disabled={selectedFiles.length === 0 || !selectedClient || uploading}
-            className={`flex items-center px-4 py-2 rounded-md shadow-sm text-white font-medium ${
-              uploading || selectedFiles.length === 0 || !selectedClient 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-primary hover:bg-primary-dark'
-            }`}
-            whileHover={selectedFiles.length > 0 && !!selectedClient && !uploading ? { scale: 1.03 } : {}}
-            whileTap={selectedFiles.length > 0 && !!selectedClient && !uploading ? { scale: 0.98 } : {}}
-          >
-            {uploading ? (
-              <>
-                <span className="mr-2">Uploading...</span>
-                <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+        {/* Upload button */}
+        <div className='mt-5'>
+        <motion.button
+          onClick={handleUpload}
+          disabled={selectedFiles.length === 0 || !selectedClient || uploading}
+          className={primaryButtonStyles}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          {uploading ? (
+            <>
+              <span className="mr-2">{translate('uploading')}</span>
+              <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+            </>
+          ) : (
+            <> 
+              <FaCloudUploadAlt className="mr-2" />
+              {translate('upload_files')} {selectedFiles.length > 0 ? `(${selectedFiles.length})` : ''}
               </>
-            ) : (
-              <>
-                <FaCloudUploadAlt className="mr-2" />
-                Upload {selectedFiles.length > 0 ? `(${selectedFiles.length} files)` : ''}
-              </>
-            )}
+          )}
           </motion.button>
         </div>
-      </motion.div>
+      </motion.section>
 
       {/* Process PDF Folder Section */}
-      <motion.div 
-        className="bg-white rounded-lg shadow-md p-4 md:p-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <div className="flex items-center mb-4">
-          <FaCog className="text-primary mr-2 text-xl" />
-          <h2 className="text-xl font-semibold text-primary-dark">Process PDF Folder</h2>
-        </div>
+      <motion.section className={sectionStyles}>
+        <h2 className={titleStyles}>
+          <FaCog className="mr-2" />
+          {translate('process_pdf_folder')}
+        </h2>
+        <p className={descriptionStyles}>{translate('process_folder_desc')}</p>
         
         <motion.button
           onClick={handleProcessFolder}
           disabled={processing}
-          className={`flex items-center px-4 py-2 rounded-md shadow-sm text-white font-medium ${
-            processing ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark'
-          }`}
-          whileHover={!processing ? { scale: 1.03 } : {}}
-          whileTap={!processing ? { scale: 0.98 } : {}}
+          className={primaryButtonStyles}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           {processing ? (
             <>
-              <span className="mr-2">Processing...</span>
+              <span className="mr-2">{translate('processing')}</span>
               <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
             </>
           ) : (
             <>
               <FaFolder className="mr-2" />
-              Process All PDFs in Folder
+              {translate('process_all_pdfs')}
             </>
           )}
         </motion.button>
-      </motion.div>
+      </motion.section>
 
       {/* Available PDF Files Section */}
-      <motion.div 
-        className="bg-white rounded-lg shadow-md p-4 md:p-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <FaFileAlt className="text-primary mr-2 text-xl" />
-            <h2 className="text-xl font-semibold text-primary-dark">Available PDF Files</h2>
-          </div>
-          {loading && (
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary border-t-transparent"></div>
-          )}
-        </div>
+      <motion.section className={sectionStyles}>
+        <h2 className={titleStyles}>
+          <FaFileAlt className="mr-2" />
+          {translate('available_pdfs')}
+        </h2>
+        <p className={descriptionStyles}>{translate('available_pdfs_desc')}</p>
         
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <span className="text-primary-dark">Loading files...</span>
+            <span className="text-primary-dark">{translate('loading_files')}</span>
           </div>
         ) : pdfFiles.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">No PDF files available.</div>
+          <div className="text-center py-12 text-gray-500">{translate('no_pdfs')}</div>
         ) : (
           <div>
             {pdfFiles.map((installationData, index) => (
               <div key={index} className="mb-4">
-                <h4 className="font-semibold text-primary-dark mb-2">Installation: {installationData.installation}</h4>
+                <h4 className="font-semibold text-primary-dark damb-2">{translate('installation')}: {installationData.installation}</h4>
                 <ul className="border border-gray-200 rounded-lg divide-y divide-gray-200 max-h-64 overflow-y-auto">
                   {installationData.files.map((file, fileIndex) => (
-                    <li key={fileIndex} className="p-3 text-sm text-gray-700 hover:bg-gray-50">
+                    <li key={fileIndex} className="p-3  text-sm dark:hover:bg-gray-700 hover:bg-gray-50 ">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center flex-1 truncate">
+                        <div className="flex items-centerflex-1 truncate">
                           <FaFileAlt className="text-primary-light mr-2 flex-shrink-0" />
                           <span className="truncate">{file}</span>
                         </div>
                         <button 
                           onClick={() => handleViewPdf( file)}
-                          className="ml-2 text-primary hover:text-primary-dark flex items-center"
-                          title="View PDF"
+                          className="ml-2 text-white hover:text-gray-200 flex items-center"
+                          title={translate('view_pdf')}
                         >
                           <FaEye className="mr-1" />
-                          <span>View</span>
+                          <span>{translate('view_pdf')}</span>
                         </button>
                       </div>
                     </li>
@@ -380,35 +443,31 @@ const AdminPanel: React.FC = () => {
             ))}
           </div>
         )}
-      </motion.div>
+      </motion.section>
 
       {/* Reset All Bills Section */}
-      <motion.div 
-        className="bg-white rounded-lg shadow-md p-4 md:p-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
-        <div className="flex items-center mb-4">
-          <FaTrashAlt className="text-error-red mr-2 text-xl" />
-          <h2 className="text-xl font-semibold text-primary-dark">Reset Database</h2>
-        </div>
+      <motion.section className={sectionStyles}>
+        <h2 className={titleStyles}>
+          <FaTrashAlt className="text-error-red mr-2" />
+          {translate('reset_database')}
+        </h2>
+        <p className={descriptionStyles}>{translate('reset_database_desc')}</p>
         
         <div className="space-y-3">
           <p className="text-sm text-gray-600">
-            This action will delete all bills from the database. This cannot be undone.
+            {translate('reset_warning')}
           </p>
           
           {!showConfirmReset ? (
             <motion.button
               onClick={() => setShowConfirmReset(true)}
               disabled={resetting}
-              className="flex items-center px-4 py-2 rounded-md shadow-sm text-white font-medium bg-error-red hover:bg-red-600"
-              whileHover={{ scale: 1.03 }}
+              className={dangerButtonStyles}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               <FaTrashAlt className="mr-2" />
-              Reset All Bills
+              {translate('reset_all_bills')}
             </motion.button>
           ) : (
             <motion.div 
@@ -419,9 +478,9 @@ const AdminPanel: React.FC = () => {
             >
               <div className="flex items-center text-error-red mb-2">
                 <FaExclamationTriangle className="mr-2" />
-                <h3 className="font-bold">Warning: This action cannot be undone</h3>
+                <h3 className="font-bold">{translate('warning')}</h3>
               </div>
-              <p className="mb-4 text-gray-700">Are you sure you want to delete all bills?</p>
+              <p className="mb-4 text-gray-700">{translate('confirm_reset')}</p>
               <div className="flex justify-end space-x-3">
                 <motion.button
                   type="button"
@@ -431,25 +490,25 @@ const AdminPanel: React.FC = () => {
                   whileTap={{ scale: 0.98 }}
                   disabled={resetting}
                 >
-                  Cancel
+                  {translate('cancel')}
                 </motion.button>
                 <motion.button
                   type="button"
                   onClick={handleResetBills}
-                  className="flex items-center px-4 py-2 bg-error-red border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700"
+                  className={dangerButtonStyles}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.98 }}
                   disabled={resetting}
                 >
                   {resetting ? (
                     <>
-                      <span>Deleting...</span>
+                      <span>{translate('deleting')}</span>
                       <span className="ml-2 inline-block h-4 w-4 rounded-full border-2 border-t-transparent border-white animate-spin"></span>
                     </>
                   ) : (
                     <>
                       <FaTrashAlt className="mr-2" />
-                      Yes, Delete All Bills
+                      {translate('confirm_delete')}
                     </>
                   )}
                 </motion.button>
@@ -457,21 +516,23 @@ const AdminPanel: React.FC = () => {
             </motion.div>
           )}
         </div>
-      </motion.div>
+      </motion.section>
 
       {/* Status Message */}
-      {statusMessage && (
-        <motion.div
-          className={`p-4 rounded-lg ${
-            statusMessage.isError ? 'bg-red-50 text-error-red' : 'bg-green-50 text-accent'
-          }`}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {statusMessage.text}
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {statusMessage && (
+          <motion.div
+            className={`p-4 rounded-lg ${
+              statusMessage.isError ? 'bg-red-50 text-error-red' : 'bg-green-50 text-accent'
+            }`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {statusMessage.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* PDF Viewer Modal */}
       <AnimatePresence>

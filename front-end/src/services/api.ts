@@ -7,6 +7,13 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
+// Utility function to convert full date to YYYY-MM format
+const convertToYearMonth = (dateString: string): string => {
+  if (!dateString) return '';
+  // Extract just YYYY-MM portion from a full date
+  return dateString.substring(0, 7);
+};
+
 // Client API calls
 export const getClients = async (): Promise<Client[]> => {
   const response = await api.get('/clients');
@@ -30,13 +37,13 @@ export const createClient = async (clientData: CreateClientDto): Promise<Client>
 
 // Bill API calls
 export const getBills = async (filters: FilterParams = {}): Promise<Bill[]> => {
-  // Convert filter parameters to match API format
   const params: Record<string, any> = {};
   
   if (filters.clientNumber) {
     // We'll filter client numbers on the frontend since the API doesn't support direct filtering
   }
   
+  // Use the correct query parameter names that match the backend
   if (filters.startDate) {
     params.startDate = filters.startDate;
   }
@@ -45,15 +52,39 @@ export const getBills = async (filters: FilterParams = {}): Promise<Bill[]> => {
     params.endDate = filters.endDate;
   }
   
+  console.log(`Fetching bills with params:`, params);
+  
   const response = await api.get('/bills', { params });
   let bills = response.data;
   
-  // If client number filter is provided, filter bills on the frontend
+  // Client number filtering on frontend
   if (filters.clientNumber) {
-    bills = bills.filter((bill: { client: { clientNumber: string | undefined; }; }) => bill.client.clientNumber === filters.clientNumber);
+    bills = bills.filter((bill: Bill) => bill.client.clientNumber === filters.clientNumber);
+  }
+  console.log(`Fetching bills with params:`, bills);
+
+  return bills;
+};
+
+// New function to get bills by date range using the specific endpoint
+export const getBillsByDateRange = async (startDate?: string, endDate?: string): Promise<Bill[]> => {
+  const params: Record<string, string> = {};
+  
+  if (startDate) {
+    params.startDate = startDate; // Format should be YYYY-MM (e.g., 2024-06)
   }
   
-  return bills;
+  if (endDate) {
+    params.endDate = endDate; // Format should be YYYY-MM (e.g., 2024-12)
+  }
+  
+  try {
+    const response = await api.get('/bills/date-range', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching bills by date range:', error);
+    throw error;
+  }
 };
 
 export const getBillById = async (id: string): Promise<Bill> => {
@@ -124,7 +155,12 @@ export const getSummaryData = async (filters: FilterParams = {}): Promise<{
   totalValueWithoutGd: number;
   totalGdEconomy: number;
 }> => {
-  const bills = await getBills(filters);
+  // Use the appropriate bills fetching method based on date filters
+  const bills = filters.startDate || filters.endDate
+    ? await getBillsByDateRange(filters.startDate, filters.endDate)
+    : await getBills(filters);
+
+  console.log('Summary calculation using bills:', bills);
   
   const summary = bills.reduce(
     (acc, bill) => {
@@ -143,6 +179,7 @@ export const getSummaryData = async (filters: FilterParams = {}): Promise<{
     }
   );
   
+  console.log('Calculated summary:', summary);
   return summary;
 };
 

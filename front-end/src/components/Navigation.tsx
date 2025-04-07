@@ -1,19 +1,27 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaHome, FaBook, FaUserShield, FaBars, FaTimes } from 'react-icons/fa';
+import { FaHome, FaBook, FaUserShield, FaBars, FaTimes, FaMoon, FaSun, FaGlobe } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/logo.svg';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Navigation: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { language, setLanguage, translate } = useLanguage();
+  const { toggleTheme, isDark } = useTheme();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const toggleLanguage = () => {
+    setLanguage(language === 'pt-BR' ? 'en' : 'pt-BR');
+  };
+
   return (
     <motion.nav 
-      className="bg-gradient-to-r from-primary-dark via-primary to-primary-light text-white shadow-lg"
+      className="bg-gradient-to-r from-primary-dark via-primary to-primary-light dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 text-white shadow-lg"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -29,8 +37,29 @@ const Navigation: React.FC = () => {
           <img src={logo} alt="Lumi Logo" className="h-16 w-16" />
         </motion.div>
 
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
+        {/* Mobile Menu Buttons */}
+        <div className="md:hidden flex items-center">
+          <button 
+            onClick={toggleTheme}
+            className="p-2 mr-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white text-white"
+            aria-label="Toggle Theme"
+          >
+            <div className="flex items-center">
+              {isDark ? <FaSun className="h-5 w-5" /> : <FaMoon className="h-5 w-5" />}
+            </div>
+          </button>
+
+          <button 
+            onClick={toggleLanguage}
+            className="p-2 mr-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white text-white"
+            aria-label="Toggle Language"
+          >
+            <div className="flex items-center">
+              <FaGlobe className="h-5 w-5 mr-1" />
+              <span className="text-sm font-medium">{language === 'pt-BR' ? 'PT' : 'EN'}</span>
+            </div>
+          </button>
+          
           <button 
             onClick={toggleMenu}
             className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white"
@@ -44,11 +73,45 @@ const Navigation: React.FC = () => {
         </div>
 
         {/* Desktop Navigation */}
-        <ul className="hidden md:flex space-x-6 transition-colors duration-200">
-          <NavItem to="/" icon={<FaHome />} label="Dashboard" />
-          <NavItem to="/bills" icon={<FaBook />} label="Bills Library" />
-          <NavItem to="/admin" icon={<FaUserShield />} label="Admin" />
-        </ul>
+        <div className="hidden md:flex items-center">
+          <ul className="flex space-x-6 transition-colors duration-200 mr-4">
+            <NavItem to="/" icon={<FaHome />} label={translate('dashboard')} />
+            <NavItem to="/bills" icon={<FaBook />} label={translate('bills_library')} />
+            <NavItem to="/admin" icon={<FaUserShield />} label={translate('admin')} />
+          </ul>
+
+          {/* Theme Toggle Button */}
+          <motion.button
+            onClick={toggleTheme}
+            className="flex items-center space-x-1 px-3 py-2 mr-3 bg-white bg-opacity-20 rounded-md hover:bg-opacity-30 transition-colors duration-200"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDark ? (
+              <>
+                <FaSun className="h-4 w-4" />
+                <span className="text-sm font-medium">{translate('light_mode')}</span>
+              </>
+            ) : (
+              <>
+                <FaMoon className="h-4 w-4" />
+                <span className="text-sm font-medium">{translate('dark_mode')}</span>
+              </>
+            )}
+          </motion.button>
+
+          {/* Language Toggle Button */}
+          <motion.button
+            onClick={toggleLanguage}
+            className="flex items-center space-x-1 px-3 py-2 bg-white bg-opacity-20 rounded-md hover:bg-opacity-30 transition-colors duration-200"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <FaGlobe className="h-4 w-4" />
+            <span className="text-sm font-medium">{language === 'pt-BR' ? 'PT-BR' : 'EN'}</span>
+          </motion.button>
+        </div>
       </div>
 
       {/* Mobile Navigation Menu */}
@@ -60,10 +123,10 @@ const Navigation: React.FC = () => {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden"
           >
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-primary-light ">
-              <MobileNavItem to="/" icon={<FaHome />} label="Dashboard" onClick={toggleMenu} />
-              <MobileNavItem to="/bills" icon={<FaBook />} label="Bills Library" onClick={toggleMenu} />
-              <MobileNavItem to="/admin" icon={<FaUserShield />} label="Admin" onClick={toggleMenu} />
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-primary-light dark:border-gray-600">
+              <MobileNavItem to="/" icon={<FaHome />} label={translate('dashboard')} onClick={toggleMenu} />
+              <MobileNavItem to="/bills" icon={<FaBook />} label={translate('bills_library')} onClick={toggleMenu} />
+              <MobileNavItem to="/admin" icon={<FaUserShield />} label={translate('admin')} onClick={toggleMenu} />
             </div>
           </motion.div>
         )}

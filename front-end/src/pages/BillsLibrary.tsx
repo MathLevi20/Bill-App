@@ -1,29 +1,72 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bill, FilterParams } from '../types/index';
-import { getBills, downloadBillPdf, getPdfViewUrl } from '../services/api';
+import { getBills, downloadBillPdf, getPdfViewUrl, getBillsByDateRange } from '../services/api';
 import FilterPanel from '../components/FilterPanel';
 import PdfViewerModal from '../components/PdfViewerModal';
-import { FaDownload, FaSpinner, FaEye } from 'react-icons/fa';
+import { FaDownload, FaSpinner, FaEye, FaTimes, FaSearch } from 'react-icons/fa';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const BillsLibrary: React.FC = () => {
+  const { translate } = useLanguage();
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [_currentFilters, setCurrentFilters] = useState<FilterParams>({});
   const [viewingPdf, setViewingPdf] = useState<{ url: string, fileName: string } | null>(null);
+  const [showWarning, setShowWarning] = useState(false);
+
+  // Add useEffect to handle auto-hiding warning
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (showWarning) {
+      timeoutId = setTimeout(() => {
+        setShowWarning(false);
+      }, 5000); // 5 seconds
+    }
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [showWarning]);
+
+  const validateDateRange = (filters: FilterParams): boolean => {
+    if (filters.startDate && filters.endDate) {
+      const startYear = filters.startDate.substring(0, 4);
+      const endYear = filters.endDate.substring(0, 4);
+      setShowWarning(startYear !== endYear);
+    }
+    return true; // Always return true to allow filtering
+  };
 
   const fetchBills = async (filters: FilterParams = {}) => {
     try {
+      validateDateRange(filters);
       setLoading(true);
       setError(null);
       setCurrentFilters(filters);
-      const data = await getBills(filters);
-      setBills(data);
+      console.log('Current filters:', filters);
+      // Check if we're using date-based filtering in YYYY-MM format
+      if (filters.startDate || filters.endDate) {
+        const data = await getBillsByDateRange(
+          filters.startDate, 
+          filters.endDate
+        );
+        console.log(data)
+        setBills(data);
+      } else {
+        // Use the regular getBills function for other filter types
+
+        const data = await getBills(filters);
+        console.log(data);
+
+        setBills(data);
+      }
     } catch (err) {
       console.error('Error fetching bills:', err);
-      setError('Failed to load bills. Please try again later.');
+      setError(translate('error_loading_bills'));
     } finally {
       setLoading(false);
     }
@@ -95,21 +138,50 @@ const BillsLibrary: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-primary-dark">Biblioteca de Faturas</h1>
+      <h1 className="text-2xl font-bold text-primary-dark dark:text-gray-200">{translate('bills_library')}</h1>
       <FilterPanel onFilter={handleFilter} />
       
+      {/* Warning Alert with animation */}
+      <AnimatePresence>
+        {showWarning && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="bg-yellow-50 border border-yellow-400 text-yellow-800 px-4 py-3 rounded relative mb-4"
+          >
+            <span className="block sm:inline">{translate('date_range_warning')}</span>
+            <button
+              onClick={() => setShowWarning(false)}
+              className="absolute top-0 bottom-0 right-0 px-4 py-3"
+            >
+              <FaTimes />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {loading ? (
-        <div className="flex items-center justify-center h-64 bg-white rounded-lg shadow-md">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-          <span className="ml-3 text-primary-dark">Carregando faturas...</span>
+        <div className="flex items-center justify-center h-64">
+          <span className="ml-3">{translate('loading_bills')}</span>
         </div>
       ) : error ? (
-        <div className="bg-red-50 border border-error-red text-error-red px-6 py-4 rounded-lg">
+        <div className="bg-red-50 border-error-red">
           {error}
         </div>
       ) : bills.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 bg-white rounded-lg shadow-md">
-          <p className="text-lg text-gray-500">Nenhuma fatura encontrada com os filtros atuais.</p>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-full p-4 mb-4">
+              <FaSearch className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+              {translate('no_bills_found')}
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm">
+              {translate('try_adjusting_filters')}
+            </p>
+          </div>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -118,13 +190,13 @@ const BillsLibrary: React.FC = () => {
               <thead className="bg-primary">
                 <tr>
                   <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                    Nome da UC
+                    {translate('client_name')}
                   </th>
                   <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                    Número da UC
+                    {translate('client_number')}
                   </th>
                   <th scope="col" className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                    Distribuidora
+                    {translate('distributor')}
                   </th>
                   {monthsAbbr.map((month) => (
                     <th key={month} scope="col" className="px-1 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
@@ -158,35 +230,23 @@ const BillsLibrary: React.FC = () => {
                         return (
                           <td key={`${clientNumber}-${monthAbbr}`} className="px-1 py-3 whitespace-nowrap text-center">
                             {bill ? (
-                              <div className="flex justify-center space-x-1">
-                                <motion.button
-                                  className="w-7 h-7 rounded-full flex items-center justify-center bg-primary text-white"
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => handleDownload(bill)}
-                                  disabled={downloading === bill.id}
-                                  title="Download fatura"
-                                >
-                                  {downloading === bill.id ? (
-                                    <FaSpinner className="animate-spin h-4 w-4" />
-                                  ) : (
-                                    <FaDownload className="h-3.5 w-3.5" />
-                                  )}
-                                </motion.button>
+                              <div className="flex flex-col space-y-1">
+                      
                                 
                                 <motion.button
-                                  className="w-7 h-7 rounded-full flex items-center justify-center bg-accent text-white"
-                                  whileHover={{ scale: 1.1 }}
+                                  className="px-2 py-1 rounded flex items-center justify-center bg-accent text-white shadow-sm hover:shadow-md text-xs"
+                                  whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                   onClick={() => handleViewPdf(bill)}
                                   title="Visualizar fatura"
                                 >
-                                  <FaEye className="h-3.5 w-3.5 " />
+                                  <FaEye className="h-3 w-3 mr-1" />
+                                  <span>{translate('view')}</span>
                                 </motion.button>
                               </div>
                             ) : (
-                              <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center mx-auto">
-                                -
+                              <div className="w-full h-8 rounded bg-gray-200 text-gray-400 flex items-center justify-center mx-auto text-xs">
+                                {translate('unavailable')}
                               </div>
                             )}
                           </td>

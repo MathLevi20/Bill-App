@@ -1,5 +1,6 @@
 declare module 'react-datepicker' {
   import React from 'react';
+  export function registerLocale(localeName: string, localeData: object): void;
 
   export interface ReactDatePickerProps {
     adjustDateOnChange?: boolean;
@@ -15,6 +16,7 @@ declare module 'react-datepicker' {
     customInputRef?: string;
     dateFormat?: string | string[];
     dateFormatCalendar?: string;
+    
     dayClassName?: (date: Date) => string | null;
     disabled?: boolean;
     disabledKeyboardNavigation?: boolean;

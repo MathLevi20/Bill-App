@@ -45,10 +45,11 @@ export interface CreateBillDto {
 
 export interface FilterParams {
   clientNumber?: string;
-  startDate?: string;
-  endDate?: string;
-  year?: string; // Add this line
-
+  startDate?: string;     // Format: YYYY-MM
+  endDate?: string;       // Format: YYYY-MM
+  startYearMonth?: string; // Format: YYYY-MM
+  endYearMonth?: string;  // Format: YYYY-MM
+  year?: string;
 }
 
 export interface ChartData {
