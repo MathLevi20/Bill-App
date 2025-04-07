@@ -1,64 +1,99 @@
 # Lumi Bill Analyzer
 
-![Lumi Logo](src/assets/logo.png)
+<div align="center">
+  <img src="src/assets/logo.png" alt="Lumi Logo" width="200"/>
+  <p>Uma aplicação web para análise de contas de energia e visualização de dados de consumo.</p>
+</div>
 
-A web application for analyzing electricity bills and visualizing energy consumption data.
+## 📋 Sumário
 
-## Assets
+- [Recursos](#recursos)
+- [Tecnologias](#tecnologias)
+- [Instalação](#instalação)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Variáveis de Ambiente](#variáveis-de-ambiente)
+- [Scripts Disponíveis](#scripts-disponíveis)
+- [Contribuição](#contribuição)
 
-- The `src/assets` folder contains static files like the logo (`logo.png`).
-- Replace the placeholder logo with your actual logo.
+## 🚀 Recursos
 
-## Getting Started
+- Análise detalhada de contas de energia
+- Visualização de dados de consumo
+- Gráficos interativos de histórico de consumo
+- Comparação de períodos
+- Exportação de relatórios
 
-### Prerequisites
+## 💻 Tecnologias
 
-- Node.js (v14 or higher)
-- Yarn package manager
+- React.js
+- TypeScript
+- Material-UI
+- Chart.js
+- Axios
+- React Router
+- Jest (Testes)
 
-### Installation
+## 🔧 Instalação
 
-1. Install dependencies:
+1. Clone o repositório:
+```bash
+git clone https://github.com/MathLevi20/Bill-App
+cd bill-app/front-end
+```
 
+2. Instale as dependências:
 ```bash
 yarn
 ```
 
-2. Configure environment variables:
-   - Copy `.env.example` to `.env`
-   - Modify the values as needed
+3. Configure as variáveis de ambiente:
+```bash
+cp .env.example .env
+```
 
-3. Start the development server:
-
+4. Inicie o servidor de desenvolvimento:
 ```bash
 yarn start
 ```
 
-4. Build for production:
+## 📁 Estrutura do Projeto
 
-```bash
-yarn build
+```
+src/
+├── assets/         # Arquivos estáticos (imagens, fonts)
+├── components/     # Componentes reutilizáveis
+├── pages/         # Componentes de página
+├── services/      # Serviços e integrações com API
+├── hooks/         # Custom hooks
+├── utils/         # Funções utilitárias
+├── types/         # Definições de tipos TypeScript
+└── styles/        # Estilos globais
 ```
 
-### Testing
+## ⚙️ Variáveis de Ambiente
 
-Run the test suite:
+| Variável | Descrição | Valor Padrão |
+|----------|-----------|--------------|
+| REACT_APP_API_URL | URL da API backend | http://localhost:4000/ |
+| REACT_APP_ENV | Ambiente atual | development |
+| REACT_APP_ENABLE_MOCK_DATA | Habilita dados mockados | false |
 
-```bash
-yarn test
-```
+## 📜 Scripts Disponíveis
 
-## Project Structure
+- `yarn start`: Inicia o servidor de desenvolvimento
+- `yarn build`: Gera build de produção
+- `yarn test`: Executa testes
+- `yarn lint`: Verifica problemas de linting
+- `yarn format`: Formata o código
 
-- `/src/components` - Reusable UI components
-- `/src/pages` - Page components for routing
-- `/src/services` - API service functions
-- `/src/types` - TypeScript type definitions
+## 🤝 Contribuição
 
-## Environment Variables
+1. Faça um Fork do projeto
+2. Crie sua Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a Branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-The application uses the following environment variables:
+---
 
-- `REACT_APP_API_URL`: URL for the backend API
-- `REACT_APP_ENV`: Current environment (development, production)
-- `REACT_APP_ENABLE_MOCK_DATA`: Flag to enable mock data for development
+
