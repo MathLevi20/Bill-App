@@ -586,4 +586,83 @@ export class BillsService {
       throw new BadRequestException(`Erro ao excluir todas as faturas: ${error.message}`);
     }
   }
+
+  async findByDateRange(startDate?: string, endDate?: string): Promise<any[]> {
+    // Create query builder for filtering by date
+    const queryBuilder = this.billRepository.createQueryBuilder('bill')
+      .leftJoinAndSelect('bill.client', 'client');
+    
+    if (startDate) {
+      // Remove day component if present (convert YYYY-MM-DD to YYYY-MM)
+      const [startYear, startMonth] = startDate.split('-').slice(0, 2);
+      queryBuilder.andWhere(
+        '(bill.referenceYear > :startYear OR (bill.referenceYear = :startYear AND POSITION(LOWER(bill.referenceMonth) IN :months) >= POSITION(LOWER(:startMonth) IN :months)))',
+        { 
+          startYear: Number(startYear),
+          startMonth: this.getMonthName(Number(startMonth)),
+          months: 'janeirofevereiromarçoabrilmaiojunhojulhoagostosetoubronovembrodezembro'
+        }
+      );
+    }
+    
+    if (endDate) {
+      // Remove day component if present (convert YYYY-MM-DD to YYYY-MM)
+      const [endYear, endMonth] = endDate.split('-').slice(0, 2);
+      queryBuilder.andWhere(
+        '(bill.referenceYear < :endYear OR (bill.referenceYear = :endYear AND POSITION(LOWER(bill.referenceMonth) IN :months) <= POSITION(LOWER(:endMonth) IN :months)))',
+        { 
+          endYear: Number(endYear),
+          endMonth: this.getMonthName(Number(endMonth)),
+          months: 'janeirofevereiromarçoabrilmaiojunhojulhoagostosetoubronovembrodezembro'
+        }
+      );
+    }
+    
+    const bills = await queryBuilder.getMany();
+    
+    // Try to find matching PDF files for each bill
+    const installationsWithFiles = await this.listPdfFiles();
+    
+    return bills.map(bill => {
+      let filename = null;
+      
+      // Try to find matching file for this bill
+      if (bill.client && bill.client.clientNumber) {
+        const installation = installationsWithFiles.find(
+          install => install.installation === bill.client.clientNumber
+        );
+        
+        if (installation) {
+          // Look for file matching month and year
+          const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                             'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+          const monthIndex = monthNames.findIndex(
+            m => m.toLowerCase() === bill.referenceMonth.toLowerCase()
+          );
+          
+          if (monthIndex !== -1) {
+            const monthNum = (monthIndex + 1).toString().padStart(2, '0');
+            const filePattern = new RegExp(`${bill.client.clientNumber}-${monthNum}-${bill.referenceYear}\\.pdf$`, 'i');
+            
+            const matchingFile = installation.files.find(file => filePattern.test(file));
+            if (matchingFile) {
+              filename = matchingFile;
+            }
+          }
+        }
+      }
+      
+      return {
+        ...bill,
+        filename
+      };
+    });
+  }
+
+  // Helper method to convert month number to name
+  private getMonthName(monthNumber: number): string {
+    const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    return monthNames[monthNumber - 1] || '';
+  }
 }

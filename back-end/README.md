@@ -2,6 +2,12 @@
 
 Este projeto é uma API em NestJS que permite extrair dados relevantes de faturas de energia elétrica, armazená-los em um banco de dados PostgreSQL e disponibilizá-los através de uma API REST.
 
+## Aplicação Implantada
+
+A API está disponível online em: [https://lumi-energy-bills-app.onrender.com](https://lumi-energy-bills-app.onrender.com)
+
+Documentação Swagger: [https://lumi-energy-bills-app.onrender.com/api](https://lumi-energy-bills-app.onrender.com/api)
+
 ## Tecnologias Utilizadas
 
 - NestJS
@@ -11,6 +17,7 @@ Este projeto é uma API em NestJS que permite extrair dados relevantes de fatura
 - Docker Compose
 - PDF-Parse para extração de dados de PDFs
 - Swagger para documentação da API
+- Jest para testes unitários e de integração
 
 ## Estrutura do Projeto
 
@@ -42,23 +49,11 @@ cd energy-bills-api
 
 2. Inicie os serviços com Docker:
 ```bash
-npm run docker:build  # Constrói as imagens
-npm run docker:up     # Inicia os contêineres
+docker-compose up -d
 ```
 
-3. Execute as migrações:
-```bash
-npm run docker:migrate
-```
-
-A API estará disponível em http://localhost:3000.
-
-Outros comandos úteis:
-```bash
-npm run docker:logs    # Exibe logs dos contêineres
-npm run docker:restart # Reinicia os contêineres
-npm run docker:down    # Para os contêineres
-```
+A API estará disponível em http://localhost:4000.
+A documentação Swagger estará disponível em http://localhost:4000/api
 
 ### Execução Local (sem Docker)
 
@@ -77,18 +72,19 @@ npm install
 
 3. Inicie o banco de dados PostgreSQL com Docker:
 ```bash
-docker-compose up -d
+docker-compose up -d postgres
 ```
 
 4. Configure o arquivo .env:
 ```
 DATABASE_URL="postgresql://admin:admin@localhost:5432/energy_bills?schema=public"
+DATABASE_URL_LOCAL="postgresql://admin:admin@localhost:5432/energy_bills?schema=public"
 FATURAS_FOLDER_PATH="/caminho/para/pasta/faturas"
 ```
 
 5. Execute as migrações do Prisma:
 ```bash
-npx prisma migrate dev --name init
+npm run prisma:migrate
 ```
 
 6. Inicie a aplicação:
@@ -120,7 +116,8 @@ npm run process-bills
 
 ### Faturas
 
-- `GET /bills` - Obter todas as faturas
+- `GET /bills` - Obter todas as faturas (aceita parâmetros de filtro por data)
+- `GET /bills/date-range` - Obter faturas dentro de um intervalo de datas
 - `GET /bills/:id` - Obter uma fatura específica pelo ID
 - `GET /bills/client/:clientId` - Obter todas as faturas de um cliente
 - `POST /bills` - Criar uma nova fatura manualmente
@@ -128,98 +125,6 @@ npm run process-bills
 - `GET /bills/folder/list` - Listar todos os PDFs na pasta de faturas
 - `POST /bills/folder/process` - Processar todos os PDFs na pasta de faturas
 
-## Estrutura de Pastas de Faturas
-
-A aplicação espera que as faturas estejam organizadas em uma estrutura de pastas específica:
-
-## Autenticação
-
-A API não implementa autenticação nesta versão. Para ambientes de produção, recomenda-se implementar um sistema de autenticação JWT.
-
-## Funcionamento
-
-1. **Extração de Dados**:
-   - Envie um PDF de fatura para o endpoint `/bills/upload`
-   - Ou coloque PDFs na pasta "faturas" e acione o processamento
-   - A API extrai dados como número do cliente, mês de referência, consumo de energia, etc.
-   - Calcula valores derivados como consumo total e economia GD
-
-2. **Armazenamento**:
-   - Os dados são armazenados no PostgreSQL usando TypeORM
-   - As entidades clientes e faturas estão relacionadas (1:N)
-
-3. **Consulta**:
-   - Use os endpoints da API para consultar os dados armazenados
-   - Filtre faturas por cliente, data, etc.
-
 ## Testes
 
-```bash
-# Executar todos os testes
-npm run test
-
-# Executar testes com cobertura
-npm run test:cov
-```
-
-## Resolução de problemas
-
-### Erro de incompatibilidade do PostgreSQL
-
-Se você encontrar o erro:
-```
-FATAL: database files are incompatible with server
-DETAIL: The data directory was initialized by PostgreSQL version X, which is not compatible with this version Y
-```
-
-Isso indica que o volume persistente contém dados de uma versão diferente do PostgreSQL. Para resolver:
-
-1. Pare os contêineres:
-```bash
-docker-compose down
-```
-
-2. Remova o volume existente (isso apagará os dados atuais do banco):
-```bash
-docker volume rm lumi-energy-bills-postgres-data
-```
-
-3. Reconstrua e inicie os contêineres:
-```bash
-docker-compose up --build -d
-```
-
-4. Execute as migrações:
-```bash
-npm run docker:migrate
-```
-
-### Erro com o Prisma no Docker Alpine
-
-Se você encontrar um erro relacionado às bibliotecas do Prisma como:
-```
-Error: Unable to require(`/app/node_modules/.prisma/client/libquery_engine-linux-musl.so.node`)
-```
-
-Isso pode ser causado por uma incompatibilidade entre o Prisma e a imagem Docker Alpine. Para resolver:
-
-1. Adicione a seguinte linha ao seu Dockerfile:
-```
-RUN apk add --no-cache libc6-compat
-```
-
-2. Rebuild the Docker image:
-```bash
-docker-compose build
-```
-
-3. Restart the containers:
-```bash
-docker-compose up -d
-```
-
-## Scripts Prisma
-
-- `prisma:generate`: Gera o cliente Prisma.
-- `prisma:studio`: Abre a interface gráfica do Prisma Studio.
-- `prisma:migrate`: Cria e aplica uma nova migração com o nome especificado (exemplo: `--name init`).
+O projeto inclui testes unitários, testes de integração e testes end-to-end. Use os seguintes comandos para execut

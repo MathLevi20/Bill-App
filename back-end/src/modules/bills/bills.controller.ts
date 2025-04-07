@@ -10,13 +10,14 @@ import {
   BadRequestException,
   Res,
   NotFoundException,
-  StreamableFile
+  StreamableFile,
+  Query
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BillsService } from './bills.service';
 import { CreateBillDto } from './dto/create-bill.dto';
 import { Bill } from './entities/bill.entity';
-import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -135,6 +136,100 @@ export class BillsController {
   })
   async findAll(): Promise<any[]> {
     return this.billsService.findAll();
+  }
+
+  @Get('date-range')
+  @ApiOperation({ 
+    summary: 'Listar faturas por intervalo de datas',
+    description: 'Retorna uma lista de faturas filtradas por período, baseando-se no mês e ano de referência das faturas. ' +
+                 'Os parâmetros são opcionais: se nenhum for fornecido, todas as faturas serão retornadas; ' +
+                 'se apenas startDate for fornecido, retorna faturas a partir desse mês; ' +
+                 'se apenas endDate for fornecido, retorna faturas até esse mês. ' +
+                 'Se o dia for fornecido (YYYY-MM-DD), apenas o mês e ano serão considerados.'
+  })
+  @ApiQuery({ 
+    name: 'startDate', 
+    required: false, 
+    description: 'Data inicial no formato YYYY-MM ou YYYY-MM-DD (exemplo: 2023-01 ou 2023-01-01). Se o dia for fornecido, ele será ignorado.',
+    example: '2023-01'
+  })
+  @ApiQuery({ 
+    name: 'endDate', 
+    required: false, 
+    description: 'Data final no formato YYYY-MM ou YYYY-MM-DD (exemplo: 2023-12 ou 2023-12-31). Se o dia for fornecido, ele será ignorado.',
+    example: '2023-12'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de faturas filtradas por data', 
+    schema: {
+      type: 'array',
+      items: {
+        allOf: [
+          { $ref: '#/components/schemas/Bill' },
+          { 
+            type: 'object',
+            properties: {
+              filename: {
+                type: 'string',
+                nullable: true,
+                description: 'Nome do arquivo PDF da fatura, quando disponível'
+              }
+            }
+          }
+        ]
+      },
+      example: [
+        {
+          "id": 1,
+          "referenceMonth": "Janeiro",
+          "referenceYear": 2023,
+          "energyElectricKwh": 150.5,
+          "energyElectricValue": 200.75,
+          "energySCEEEKwh": 50.25,
+          "energySCEEEValue": 75.5,
+          "energyCompensatedKwh": 30.0,
+          "energyCompensatedValue": 45.0,
+          "publicLightingValue": 25.0,
+          "totalEnergyConsumption": 200.75,
+          "totalValueWithoutGD": 301.25,
+          "gdSavings": 45.0,
+          "client": {
+            "id": 1,
+            "name": "Cliente Exemplo",
+            "clientNumber": "3001234567"
+          },
+          "filename": "3001234567-01-2023.pdf"
+        }
+      ]
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Formato de data inválido' })
+  async findByDateRange(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Res({ passthrough: true }) response?: Response
+  ): Promise<any[]> {
+    const bills = await this.billsService.findByDateRange(startDate, endDate);
+    
+    // Adicionar cabeçalhos de cache para melhorar o desempenho
+    if (response) {
+      response.setHeader('Cache-Control', 'public, max-age=300'); // Cache por 5 minutos
+      response.setHeader('ETag', this.generateETag(bills));
+    }
+    
+    return bills;
+  }
+
+  private generateETag(data: any): string {
+    // Gera um ETag simples baseado no conteúdo da resposta
+    const str = JSON.stringify(data);
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return `"${hash.toString(36)}"`;
   }
 
   @Get(':id')
